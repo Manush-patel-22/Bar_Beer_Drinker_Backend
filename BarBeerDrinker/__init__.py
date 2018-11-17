@@ -20,6 +20,12 @@ def get_bars():
 def get_beers():
     return jsonify(database.get_beers())
 
+@app.route('/api/beers_cheaper_than', methods = ["POST"])
+def find_beers_cheaper_than():
+    body = json.loads(request.data)
+    max_price = bpdy['maxPrice']
+    return jsonify(database.filer_beers(max_price))
+
 @app.route('/api/bar/<name>', methods = ["GET"])
 def find_bar(name):
     try:
@@ -62,8 +68,30 @@ def find_popular_bar_for_beer(name):
     except Exception as e:
         return make_response(str(e), 500)
 
-@app.route('/api/beers_cheaper_than', methods = ["POST"])
-def find_beers_cheaper_than():
-    body = json.loads(request.data)
-    max_price = bpdy['maxPrice']
-    return jsonify(database.filer_beers(max_price))
+@app.route('/api/time_distribution_for_beer/<name>', methods = ["GET"])
+def time_distribution_for_beer(name):
+    try:
+        if name is None:
+            raise ValueErroe("beer is not specified")
+        beer_with_time = database.time_distribution_for_beer(name)
+        if beer_with_time is None:
+            return make_response("No beer found with the given name.", 404)
+        return jsonify(beer_with_time)
+    except ValueError as e:
+        return make_response(str(e), 400)
+    except Exception as e:
+        return make_response(str(e), 500)
+
+@app.route('/api/top_drinker_for_beer/<name>', methods = ["GET"])
+def find_top_drinker_for_beer(name):
+    try:
+        if name is None:
+            raise ValueErroe("beer is not specified")
+        drinker = database.top_drinker_for_beer(name)
+        if drinker is None:
+            return make_response("No drinker found for the given beerName.", 404)
+        return jsonify(drinker)
+    except ValueError as e:
+        return make_response(str(e), 400)
+    except Exception as e:
+        return make_response(str(e), 500)

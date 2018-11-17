@@ -90,17 +90,71 @@ def top_drinker_for_beer(beer_name):
 
         rs = con.execute(query, beer_name=beer_name)
         result = [dict(row) for row in rs]
+
         return result
 
 # As well as time distribution of when this beer sells the most.
 def time_distribution_for_beer(beer_name):
     with engine.connect() as con:
         query = sql.text(
+            "SELECT item, trans_time " \
+            "FROM barbeerdrinker.transactions " \
+            "WHERE item = :beer_name " \
+            "ORDER BY trans_time ASC" \
         )
 
         rs = con.execute(query, beer_name=beer_name)
         result = [dict(row) for row in rs]
-        return result
+        times = [li['trans_time'] for li in result]
+
+        timeList = [{'time': '1:00 - 2:00', 'count': 0},
+        {'time': '2:00 - 3:00', 'count': 0},
+        {'time': '11:00 - 12:00', 'count': 0},
+        {'time': '10:00 - 11:00', 'count': 0},
+        {'time': '9:00 - 10:00', 'count': 0},
+        {'time': '8:00 - 9:00', 'count': 0},
+        {'time': '7:00 - 8:00', 'count': 0}]
+
+        for time in times:
+            if time >= '1:00' and time <= '2:00':
+                for dic in timeList:
+                    if dic['time'] == '1:00 - 2:00':
+                        dic['count'] += 1
+                
+            elif time >= '2:00' and time <= '3:00':
+                for dic in timeList:
+                    if dic['time'] == '2:00 - 3:00':
+                        dic['count'] += 1
+                
+            elif time >= '11:00' and time <= '12:00':
+                for dic in timeList:
+                    if dic['time'] == '11:00 - 12:00':
+                        dic['count'] += 1
+                
+            elif time >= '10:00' and time <= '11:00':
+                for dic in timeList:
+                    if dic['time'] == '10:00 - 11:00':
+                        dic['count'] += 1
+                
+            elif time >= '9:00' and time <= '10:00':
+                for dic in timeList:
+                    if dic['time'] == '9:00 - 10:00':
+                        dic['count'] += 1
+                
+            elif time >= '8:00' and time <= '9:00':
+                for dic in timeList:
+                    if dic['time'] == '8:00 - 9:00':
+                        dic['count'] += 1
+                
+            elif time >= '7:00' and time <= '8:00':
+                for dic in timeList:
+                    if dic['time'] == '7:00 - 8:00':
+                        dic['count'] += 1
+            
+        
+        print(timeList)
+        
+        return timeList
 
 '''
 GIVEN A DRINKER NAME::
@@ -108,7 +162,7 @@ GIVEN A DRINKER NAME::
     for the Drinker page
 1) Show his/her transactions ordered by time and grouped by different bars
 2) Show Bar Graphs of beers s/he orders the most
-3) Show Bar Graohs of his/her spending in different Bars, on different dates/weeks/months.
+3) Show Bar Graphs of his/her spending in different Bars, on different dates/weeks/months.
 '''
 # Given a drinker, show all his/her transactions ordered by time and grouped by different bars.
 def drinker_data(drinker_name):
@@ -153,3 +207,20 @@ GIVEN A BAR NAME::
 2) Show beers which are the most popular
 3) Show Manufacturers who sell the most beers
 '''
+
+# Given a Bar, Show Largest Spenders at the bar.
+def largest_spenders(bar_name):
+    with engine.connect() as con:
+        query = sql.text(
+            "SELECT DISTINCT drinker, bar, SUM(totalAmount) as total " \
+            "FROM barbeerdrinker.transactions " \
+            "WHERE bar = :bar_name " \
+            "GROUP BY drinker " \
+            "ORDER BY total DESC " \
+            "LIMIT 10"
+        )
+
+        rs = con.execute(query, drinker_name=drinker_name)
+        result = [dict(row) for row in rs]
+        return result
+
