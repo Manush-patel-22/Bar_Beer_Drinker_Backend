@@ -20,6 +20,10 @@ def get_bars():
 def get_drinkers():
     return jsonify(database.get_drinkers())
 
+@app.route('/api/beers', methods = ["GET"])
+def get_beers():
+    return jsonify(database.get_beers())
+
 @app.route('/api/bar/<name>', methods = ["GET"])
 def find_bar(name):
     try:
@@ -33,12 +37,6 @@ def find_bar(name):
         return make_response(str(e), 400)
     except Exception as e:
         return make_response(str(e), 500)
-
-@app.route('/api/beers_cheaper_than', methods = ["POST"])
-def find_beers_cheaper_than():
-    body = json.loads(request.data)
-    max_price = body['maxPrice']
-    return jsonify(database.filter_beers(max_price))
 
 #Bar Page routes 
 
@@ -120,7 +118,42 @@ def post_bar():
     CloseTime = requestData["CloseTime"]
     try:
         database.post_bar_db(name, license, city, phone, addr, OpenTime, CloseTime)
-        return "OK" #jsonify(database.post_bar_db(requestData))
+        return "OK" 
+    except Exception as e:
+        print(e)
+        return make_response(str(e), 500)
+
+@app.route('/api/post_beer', methods = ["POST"])
+def post_beer():
+    requestData = request.get_json()
+    name = requestData["name"]
+    manf = requestData["manf"]
+    try:
+        database.post_beer_db(name, manf)
+        return "OK" 
+    except Exception as e:
+        print(e)
+        return make_response(str(e), 500)
+
+@app.route('/api/post_drinker', methods = ["POST"])
+def post_drinker():
+    requestData = request.get_json()
+    name = requestData["name"]
+    city = requestData["city"]
+    phone = requestData["phone"]
+    addr = requestData["addr"]
+    try:
+        database.post_drinker_db(name, city, phone, addr)
+        return "OK" 
+    except Exception as e:
+        print(e)
+        return make_response(str(e), 500)
+
+@app.route('/api/delete_drinker/<name>', methods = ["DELETE"])
+def delete_drinker(name):
+    try:
+        database.delete_drinker_db(name)
+        return "DRINKER DELETED"
     except Exception as e:
         print(e)
         return make_response(str(e), 500)
@@ -132,4 +165,70 @@ def delete_bar(name):
         return "BAR DELETED"
     except Exception as e:
         print(e)
+        return make_response(str(e), 500)
+
+@app.route('/api/delete_beer/<name>', methods = ["DELETE"])
+def delete_beer(name):
+    try:
+        database.delete_beer_db(name)
+        return "BEER DELETED"
+    except Exception as e:
+        print(e)
+        return make_response(str(e), 500)
+
+
+@app.route('/api/beer/<name>', methods = ["GET"])
+def find_beer(name):
+    try:
+        if name is None:
+            raise ValueErroe("beer is not specified")
+        beer = database.find_beer(name)
+        if beer is None:
+            return make_response("No beer found with the given name.", 404)
+        return jsonify(beer)
+    except ValueError as e:
+        return make_response(str(e), 400)
+    except Exception as e:
+        return make_response(str(e), 500)
+
+@app.route('/api/popular_bar_for_beer/<name>', methods = ["GET"])
+def find_popular_bar_for_beer(name):
+    try:
+        if name is None:
+            raise ValueErroe("beer is not specified")
+        beer = database.top_bars_for_beer(name)
+        if beer is None:
+            return make_response("No beer found with the given name.", 404)
+        return jsonify(beer)
+    except ValueError as e:
+        return make_response(str(e), 400)
+    except Exception as e:
+        return make_response(str(e), 500)
+
+@app.route('/api/time_distribution_for_beer/<name>', methods = ["GET"])
+def time_distribution_for_beer(name):
+    try:
+        if name is None:
+            raise ValueErroe("beer is not specified")
+        beer_with_time = database.time_distribution_for_beer(name)
+        if beer_with_time is None:
+            return make_response("No beer found with the given name.", 404)
+        return jsonify(beer_with_time)
+    except ValueError as e:
+        return make_response(str(e), 400)
+    except Exception as e:
+        return make_response(str(e), 500)
+
+@app.route('/api/top_drinker_for_beer/<name>', methods = ["GET"])
+def find_top_drinker_for_beer(name):
+    try:
+        if name is None:
+            raise ValueErroe("beer is not specified")
+        drinker = database.top_drinker_for_beer(name)
+        if drinker is None:
+            return make_response("No drinker found for the given beerName.", 404)
+        return jsonify(drinker)
+    except ValueError as e:
+        return make_response(str(e), 400)
+    except Exception as e:
         return make_response(str(e), 500)
