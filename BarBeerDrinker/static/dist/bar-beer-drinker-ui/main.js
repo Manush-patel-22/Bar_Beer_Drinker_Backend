@@ -61,11 +61,6 @@ var routes = [
     {
         path: 'static',
         pathMatch: 'full',
-        redirectTo: 'bars'
-    },
-    {
-        path: '',
-        pathMatch: 'full',
         component: _welcome_welcome_component__WEBPACK_IMPORTED_MODULE_2__["WelcomeComponent"]
     },
     {
